@@ -1,0 +1,17 @@
+{
+    "name": "halon/db_test",
+    "autoload": {
+        "psr-4": {
+            "Halon\\DbTest\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "VaLeraGav",
+            "email": "deliciiouss@yandex.ru"
+        }
+    ],
+    "require": {
+        "ext-pdo": "*"
+    }
+}
