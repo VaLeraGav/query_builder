@@ -1,17 +1,20 @@
 {
-    "name": "halon/db_test",
-    "autoload": {
-        "psr-4": {
-            "Halon\\DbTest\\": "src/"
-        }
+  "name": "halon/lacerta",
+  "autoload": {
+    "psr-4": {
+      "Lacerta\\": "src/"
     },
-    "authors": [
-        {
-            "name": "VaLeraGav",
-            "email": "deliciiouss@yandex.ru"
-        }
-    ],
-    "require": {
-        "ext-pdo": "*"
+    "file": [
+      "src/DB.php"
+    ]
+  },
+  "authors": [
+    {
+      "name": "VaLeraGav",
+      "email": "deliciiouss@yandex.ru"
     }
+  ],
+  "require": {
+    "ext-pdo": "*"
+  }
 }

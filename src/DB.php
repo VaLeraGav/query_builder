@@ -1,11 +1,8 @@
 <?php
 
-namespace App;
+namespace Lacerta;
 
-class DBException extends \Exception
-{
-
-}
+use Lacerta\DBException;
 
 class DB
 {
@@ -15,16 +12,6 @@ class DB
     protected ?string $password = null;
     protected array $options;
     protected \PDO $pdo;
-    private string $lang = 'en';
-
-    protected array $error_messages = [
-        'en' => [
-            0 => '%s: no SQL query passed',
-        ],
-        'ru' => [
-            4 => '%s: не передан SQL запрос',
-        ],
-    ];
 
     private function __construct(
         $dsn = null,
@@ -48,7 +35,7 @@ class DB
     private function connect()
     {
         $this->pdo = new \PDO($this->dsn, $this->username, $this->password);
-
+        print_r($this->pdo);
         if ($this->pdo->errorCode()) {
             throw new DBException(
                 sprintf(
@@ -58,33 +45,9 @@ class DB
                 )
             );
         }
-
         return $this;
     }
 
-    public function setErrorMessagesLang(string $lang): self
-    {
-//        if (!array_key_exists($lang, $this->error_messages)) {
-//            throw new DBException(
-//                sprintf(
-//                    '%s: language "%s" is not supported, use any of: "%s". ' .
-//                    "Make a pull request for this library, or derive a new class from class 'Mysql' and add the " .
-//                    "internationalization language for your language to property self::\$exception_i18n_messages",
-//                    __METHOD__,
-//                    $lang,
-//                    implode('", "', array_keys($this->error_messages))
-//                )
-//            );
-//        }
-
-        $this->lang = $lang;
-        return $this;
-    }
-
-    public function __wakeup()
-    {
-        $this->connect();
-    }
 
     public static function setup(
         $dsn = null,
@@ -93,16 +56,40 @@ class DB
         $options = array()
     ): DB {
         if (is_null($dsn)) {
-            $dsn = 'sqlite:' . dirname(__FILE__) . DIRECTORY_SEPARATOR . 'tmp.db';
-            print_r($dsn);
+            $dsn = 'sqlite:' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Database/identifier.sqlite';
         }
         return new self($dsn, $username, $password, $options);
     }
 
+    /*
+     * Executes an SQL statement, returning a result set as a Array
+     */
+    public function query(string $sql, $params = [])
+    {
+        $connect = $this->pdo->query($sql);
+        $result = $connect->execute($params);
 
+        if (!$result) {
+            throw new \Exception('не верный запрос');
+        }
+        $matches = $connect->fetchAll(\PDO::FETCH_ASSOC);
+        if ($matches === false) {
+            throw new \Exception('Expect array, boolean given');
+        }
+        return $matches;
+    }
+
+    /*
+     * Execute an SQL statement
+     */
+    public function exec(string $sql)
+    {
+        $this->pdo->exec($sql);
+    }
+
+    public function __wakeup()
+    {
+        $this->connect();
+    }
 }
-
-
-
-DB::setup()->setErrorMessagesLang('ru');
 
