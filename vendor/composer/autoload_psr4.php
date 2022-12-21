@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Halon\\DbTest\\' => array($baseDir . '/src'),
+    'Lacerta\\' => array($baseDir . '/src'),
 );
