@@ -2,25 +2,28 @@
 
 namespace Lacerta;
 
-use Lacerta\DBException;
-
-class DB
+class DB extends Builder
 {
     const DIRECTORY_SEPARATOR = "/";
-    protected ?string $dsn = null;
-    protected ?string $username = null;
+    protected ?string $dbName = null;
+    protected ?string $userName = null;
     protected ?string $password = null;
     protected array $options;
-    protected \PDO $pdo;
+
+    protected \PDO $connect;
+    private static $instance = null; //object instance
+
+    private $tables = []; // all table names
+    private $_t; // name table
 
     private function __construct(
-        $dsn = null,
-        $username = null,
+        $dbName = null,
+        $userName = null,
         $password = null,
         $options = array()
     ) {
-        $this->dsn = $dsn;
-        $this->username = $username;
+        $this->dbName = $dbName;
+        $this->userName = $userName;
         $this->password = $password;
 
         if (empty($options)) {
@@ -34,62 +37,77 @@ class DB
 
     private function connect()
     {
-        $this->pdo = new \PDO($this->dsn, $this->username, $this->password);
-        print_r($this->pdo);
-        if ($this->pdo->errorCode()) {
-            throw new DBException(
-                sprintf(
-                    "\n" . '%s: database connection error: %s',
-                    __METHOD__,
-                    $this->pdo->errorCode()
-                )
-            );
+        $this->connect = new \PDO($this->dbName, $this->userName, $this->password);
+        try {
+            $this->connect = new \PDO($this->dbName, $this->userName, $this->password, $this->options);
+        } catch (\PDOException $e) {
+            throw new \PDOException($e->getMessage(), (int)$e->getCode());
         }
         return $this;
     }
 
-
     public static function setup(
-        $dsn = null,
-        $username = null,
+        $dbName = null,
+        $userName = null,
         $password = null,
         $options = array()
     ): DB {
-        if (is_null($dsn)) {
-            $dsn = 'sqlite:' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Database/identifier.sqlite';
+        // singleton
+        if (self::$instance === null) {
+            if (is_null($dbName)) {
+                $dbName = 'sqlite:' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Database/identifier.sqlite';
+            }
+            self::$instance = new self($dbName, $userName, $password, $options);
         }
-        return new self($dsn, $username, $password, $options);
+        return self::$instance;
     }
 
-    /*
-     * Executes an SQL statement, returning a result set as a Array
+    /**
+     * Executes an SQL statement, returning a result set as an Array
+     * @param string $sql
+     * @param array $params
      */
-    public function query(string $sql, $params = [])
+    public function query(string $sql, array $params = null)
     {
-        $connect = $this->pdo->query($sql);
+        if (!$params) {
+            return $this->connect->query($sql);
+        }
+        $connect = $this->connect->prepare($sql);
         $result = $connect->execute($params);
 
         if (!$result) {
             throw new \Exception('не верный запрос');
         }
-        $matches = $connect->fetchAll(\PDO::FETCH_ASSOC);
-        if ($matches === false) {
-            throw new \Exception('Expect array, boolean given');
-        }
-        return $matches;
+        return $connect;
     }
 
-    /*
+    /**
      * Execute an SQL statement
      */
     public function exec(string $sql)
     {
-        $this->pdo->exec($sql);
+        $this->connect->exec($sql);
     }
 
     public function __wakeup()
     {
         $this->connect();
     }
+
+    public function table($name)
+    {
+        $this->tables = $this->connect->query("SELECT name FROM sqlite_master")->fetchAll(\PDO::FETCH_COLUMN);
+        if (!in_array($name, $this->tables)) {
+            throw new \Exception("Table not found");
+        }
+        $this->_t = $name;
+        return $this;
+    }
+
+    public function __call($method, $args)
+    {
+        return call_user_func_array(array($this->connect, $method), $args);
+    }
+
 }
 
