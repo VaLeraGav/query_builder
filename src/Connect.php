@@ -2,8 +2,9 @@
 
 namespace Lacerta;
 
-class DB extends Builder
+class Connect
 {
+
     const DIRECTORY_SEPARATOR = "/";
     protected ?string $dbName = null;
     protected ?string $userName = null;
@@ -51,7 +52,7 @@ class DB extends Builder
         $userName = null,
         $password = null,
         $options = array()
-    ): DB {
+    ): Connect {
         // singleton
         if (self::$instance === null) {
             if (is_null($dbName)) {
@@ -87,6 +88,7 @@ class DB extends Builder
     public function exec(string $sql)
     {
         $this->connect->exec($sql);
+        return null;
     }
 
     public function __wakeup()
@@ -107,6 +109,43 @@ class DB extends Builder
     public function __call($method, $args)
     {
         return call_user_func_array(array($this->connect, $method), $args);
+    }
+
+    // ---------------- нужно переместить в другой файл -----
+
+    public function select(...$field)
+    {
+        print_r($field);
+        $build = new Insert($field);
+        return $this;
+    }
+
+    public function droup()
+    {
+        $sql = 'DROP TABLE ' . $this->_t;
+        return $this->exec($sql);
+    }
+
+    public function insert(array $args = [])
+    {
+        if (empty($args)) {
+            return true;
+        }
+        // отсортировать массив
+        if (!is_array(reset($args))) {
+            ksort($args);
+            $args = [$args];
+        } else {
+            foreach ($args as $key => $value) {
+                ksort($value);
+                $args[$key] = $value;
+            }
+        }
+        $new = new Insert($this->_t, $args);
+        $sql = $new->getStr();
+        //$this->exec($sql);
+        //print_r($sql);
+        return $new;
     }
 
 }

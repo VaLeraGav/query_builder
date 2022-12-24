@@ -5,7 +5,7 @@
       "Lacerta\\": "src/"
     },
     "file": [
-      "src/DB.php"
+      "src/Connect.php"
     ]
   },
   "authors": [

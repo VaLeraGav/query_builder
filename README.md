@@ -21,7 +21,7 @@ $table0 = $conect->query(
 );
 
 // Устанавливает таблицу
-$db->table("users");
+$db = $conect->table("users");
 
 $table1 = $db->select("name_field");
 //  SELECT name_field FROM users
@@ -48,26 +48,20 @@ $table6 = $db->select()
 //        GROUP BY  (`users`.`name`) 
 //        ORDER BY `id` ASC
 
-$table3 = $db->delete(5);
+$table3 = $conect->table("users")
+    ->deleteTable()
+    ->where("id", "<>", 4)
+    ->andWhere("name", "sergey24");
+//    DELETE FROM `users`
+//        WHERE (`id` <> 4) AND  WHERE (`name` = sergey24)
+
+$post = $db->where("id", 4);
+$post->delete();
 //    DELETE FROM `users`
 //        WHERE (`id` = 5)
 
-
-$table4 = $db->delete(15, 'userid');
-//    DELETE FROM `users`
-//        WHERE (`userid` = 15)
-
-
-$table4 = $db->insert()
-    ->fields(['name', 'email', 'age'])
-    ->values(['Vasya', 'name1@gmail.com', 22])
-    ->values(['Petya', 'name2@gmail.com', 33]);
-//    INSERT INTO `users`
-//        (`name`,`email`,`age`)
-//        VALUES
-//            (Vasya, name1@gmail.com, 22),
-//            (Petya, name2@gmail.com, 33)
-
+$table4 = $db->droup()
+// DROP TABLE users;
 
 $table5 = $db->insert([
     'name' => 'Valiery',
@@ -79,4 +73,27 @@ $table5 = $db->insert([
 //        VALUES
 //            (Oleg, name@gmail.com, 33)
 
+$table5 = $db->insert()
+    ->fields(['name', 'email', 'age'])
+    ->values(['Vasya', 'vasya@gmail.com', 22])
+    ->values(['Petya', 'petya@gmail.com', 24]);
+//    INSERT INTO `users`
+//        (`name`,`email`,`age`)
+//        VALUES
+//            (Vasya, vasya@gmail.com, 22),
+//            (Petya, petya@gmail.com, 24)
+    
+
+$table5 = $db->update([
+    'user' => 11,
+    'post' => 345,
+    'text' => 'Text'
+])
+    ->where("id", 4);
+//    UPDATE `users`
+//        SET
+//            `user` = 11,
+//            `post` = 345,
+//            `text` = Text
+//       WHERE (id = 4)
 ```
