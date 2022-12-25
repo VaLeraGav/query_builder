@@ -1,6 +1,7 @@
 # query_builder
 
 ## Применение:
+
 ```php
 $conect = DB::setup();
 
@@ -55,8 +56,7 @@ $table3 = $conect->table("users")
 //    DELETE FROM `users`
 //        WHERE (`id` <> 4) AND  WHERE (`name` = sergey24)
 
-$post = $db->where("id", 4);
-$post->delete();
+$post = $db->where("id", 4)->delete();
 //    DELETE FROM `users`
 //        WHERE (`id` = 5)
 
@@ -64,24 +64,32 @@ $table4 = $db->droup()
 // DROP TABLE users;
 
 $table5 = $db->insert([
-    'name' => 'Valiery',
-    'email' => 'name@gmail.com',
-    'age' => 33
+    [
+        'name' => 'Valiery',
+        'email' => 'name1@gmail.com',
+        'age' => 11
+    ],
+    [
+        'name' => 'Valiery',
+        'age' => 22
+        'email' => 'name2@gmail.com',
+     ]   
 ]);
 //    INSERT INTO `users`
-//        (`name`,`email`,`age`)
+//        (age, email, name)
 //        VALUES
-//            (Oleg, name@gmail.com, 33)
+//            (11, 'name1@gmail.com', 'Valiery')
+//            (22, 'name2@gmail.com', 'Valiery')
 
 $table5 = $db->insert()
-    ->fields(['name', 'email', 'age'])
-    ->values(['Vasya', 'vasya@gmail.com', 22])
-    ->values(['Petya', 'petya@gmail.com', 24]);
+    ->fields('name', 'email', 'age')
+    ->values('Vasya', 'vasya@gmail.com', 22)
+    ->values('Petya', 'petya@gmail.com', 24);
 //    INSERT INTO `users`
-//        (`name`,`email`,`age`)
+//        (age, email, name)
 //        VALUES
-//            (Vasya, vasya@gmail.com, 22),
-//            (Petya, petya@gmail.com, 24)
+//            (11, 'name1@gmail.com', 'Valiery')
+//            (22, 'name2@gmail.com', 'Valiery')
     
 
 $table5 = $db->update([

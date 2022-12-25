@@ -2,6 +2,9 @@
 
 namespace Lacerta;
 
+use Lacerta\Operators\Insert;
+use Lacerta\Operators\Select;
+
 class Connect
 {
 
@@ -38,7 +41,6 @@ class Connect
 
     private function connect()
     {
-        $this->connect = new \PDO($this->dbName, $this->userName, $this->password);
         try {
             $this->connect = new \PDO($this->dbName, $this->userName, $this->password, $this->options);
         } catch (\PDOException $e) {
@@ -99,9 +101,10 @@ class Connect
     public function table($name)
     {
         $this->tables = $this->connect->query("SELECT name FROM sqlite_master")->fetchAll(\PDO::FETCH_COLUMN);
-        if (!in_array($name, $this->tables)) {
-            throw new \Exception("Table not found");
-        }
+        //убрал для тестов
+//        if (!in_array($name, $this->tables)) {
+//            throw new \Exception("Table not found");
+//        }
         $this->_t = $name;
         return $this;
     }
@@ -111,14 +114,7 @@ class Connect
         return call_user_func_array(array($this->connect, $method), $args);
     }
 
-    // ---------------- нужно переместить в другой файл -----
-
-    public function select(...$field)
-    {
-        print_r($field);
-        $build = new Insert($field);
-        return $this;
-    }
+    // ----------------
 
     public function droup()
     {
@@ -126,25 +122,18 @@ class Connect
         return $this->exec($sql);
     }
 
-    public function insert(array $args = [])
+    public function insert(array $args = []): Insert
     {
-        if (empty($args)) {
-            return true;
-        }
-        // отсортировать массив
-        if (!is_array(reset($args))) {
-            ksort($args);
-            $args = [$args];
-        } else {
-            foreach ($args as $key => $value) {
-                ksort($value);
-                $args[$key] = $value;
-            }
-        }
         $new = new Insert($this->_t, $args);
         $sql = $new->getStr();
         //$this->exec($sql);
-        //print_r($sql);
+        return $new;
+    }
+
+    public function select(array $args = []): Select
+    {
+        $new = new Select($this->_t, $args);
+        $sql = $new->getStr();
         return $new;
     }
 
