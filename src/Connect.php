@@ -2,12 +2,23 @@
 
 namespace Lacerta;
 
-use Lacerta\Operators\Insert;
-use Lacerta\Operators\Select;
+use Lacerta\Operators\{
+    Insert,
+    Select,
+    Update,
+    Delete
+};
+use mysql_xdevapi\Table;
 
+
+/**
+ * @method Select select(array $args = [])
+ * @method Update update()
+ * @method Insert insert(array $args = [])
+ * @method Delete delete()
+ */
 class Connect
 {
-
     const DIRECTORY_SEPARATOR = "/";
     protected ?string $dbName = null;
     protected ?string $userName = null;
@@ -102,19 +113,17 @@ class Connect
     {
         $this->tables = $this->connect->query("SELECT name FROM sqlite_master")->fetchAll(\PDO::FETCH_COLUMN);
         //убрал для тестов
-//        if (!in_array($name, $this->tables)) {
-//            throw new \Exception("Table not found");
-//        }
+        if (!in_array($name, $this->tables)) {
+            throw new \Exception("Table not found");
+        }
         $this->_t = $name;
         return $this;
     }
 
-    public function __call($method, $args)
-    {
-        return call_user_func_array(array($this->connect, $method), $args);
-    }
-
-    // ----------------
+//    public function __call($method, $args)
+//    {
+//        return call_user_func_array(array($this->connect, $method), $args);
+//    }
 
     public function droup()
     {
@@ -122,20 +131,16 @@ class Connect
         return $this->exec($sql);
     }
 
-    public function insert(array $args = []): Insert
+    public function __call(string $name, array $args)
     {
-        $new = new Insert($this->_t, $args);
-        $sql = $new->getStr();
-        //$this->exec($sql);
-        return $new;
-    }
+        return match ($name) {
+            'insert' => new Insert($this->connect, $this->_t, ...$args),
+            'select' => new Select($this->connect, $this->_t, ...$args),
+            'delete' => new Delete($this->connect, $this->_t, ...$args),
+            'update' => new Update($this->connect, $this->_t, ...$args),
 
-    public function select(array $args = []): Select
-    {
-        $new = new Select($this->_t, $args);
-        $sql = $new->getStr();
-        return $new;
+            default => throw new \Exception('Undefined class ' . $name . ' | Connect call |')
+        };
     }
-
 }
 

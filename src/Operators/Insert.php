@@ -8,8 +8,9 @@ class Insert
     protected array $values = [];
     protected string $table = "";
 
-    public function __construct($table, $args)
+    public function __construct($connect, $table, $args)
     {
+        $this->connect = $connect;
         // sorting array and values
         if (!empty($args)) {
             if (!is_array(reset($args))) {
@@ -31,7 +32,6 @@ class Insert
 
             $this->values($args);
         }
-        return $this;
     }
 
     public function fields(...$fields): static
@@ -65,8 +65,14 @@ class Insert
 
     public function getStr(): string
     {
-        return 'INSERT INTO ' . $this->table. ' '
+        return 'INSERT INTO ' . $this->table . ' '
             . '(' . implode(", ", $this->fields) . ')'
             . ' VALUES ' . implode(",", $this->values);
+    }
+
+    public function execute()
+    {
+        $sql = $this->getStr();
+        return $this->connect->query($sql)->fetchAll();
     }
 }
