@@ -14,4 +14,5 @@ class Update
         $this->table = $table;
         $this->fields = $fields;
     }
+
 }

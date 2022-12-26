@@ -12,9 +12,9 @@ use mysql_xdevapi\Table;
 
 
 /**
- * @method Select select(array $args = [])
- * @method Update update()
- * @method Insert insert(array $args = [])
+ * @method Select select(...$args)
+ * @method Update update(...$args)
+ * @method Insert insert(...$args)
  * @method Delete delete()
  */
 class Connect
