@@ -2,4 +2,4 @@ start:
 	php bin/test.php
 
 test:
-	./vendor/bin/phpunit tests
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit tests

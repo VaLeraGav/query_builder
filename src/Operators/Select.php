@@ -127,7 +127,7 @@ class Select
         if (!in_array($union, $this->whereTypes)) {
             throw new \Exception("Передан неверный тип {$union} | whereGroup");
         }
-        $this->where[] = [" $union ("];
+        $this->where[] = [" $union("];
         $where($this);
         $this->where[] = [")"];
         return $this;
@@ -242,6 +242,11 @@ class Select
         $this->order[] = [str_replace(".", "'.'", $field), "DESC"];
         return $this;
     }
+    public function order($field, $direction)
+    {
+        $this->order[] = [str_replace(".", "'.'", $field), $direction];
+        return $this;
+    }
 
     // -----------limit
     public function limit(int $limit, int $offset = null)
@@ -265,11 +270,11 @@ class Select
         }
 
         if (!empty($this->where)) {
-            $q .= 'WHERE';
+            $q .= 'WHERE ';
             foreach ($this->where as $where) {
                 $q .= "{$where[0]}";
                 if (count($where) > 1) {
-                    $q .= "(`{$where[1]}` {$where[2]} {$where[3]})";
+                    $q .= "('{$where[1]}' {$where[2]} {$where[3]})";
                 }
                 if (!isset($where)) {
                     $q .= "{$where[0]}";
@@ -309,7 +314,7 @@ class Select
             }
         }
 
-        return $q . "\n";
+        return $q;
     }
 
     public function getAll()

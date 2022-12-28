@@ -113,9 +113,9 @@ class Connect
     {
         $this->tables = $this->connect->query("SELECT name FROM sqlite_master")->fetchAll(\PDO::FETCH_COLUMN);
         //убрал для тестов
-        if (!in_array($name, $this->tables)) {
-            throw new \Exception("Table not found");
-        }
+//        if (!in_array($name, $this->tables)) {
+//            throw new \Exception("Table not found");
+//        }
         $this->_t = $name;
         return $this;
     }

@@ -7,8 +7,9 @@ class Insert
     protected array $fields = [];
     protected array $values = [];
     protected string $table = "";
+    protected \PDO $connect;
 
-    public function __construct($connect, $table, $args)
+    public function __construct($connect, $table, ...$args)
     {
         $this->connect = $connect;
         // sorting array and values
@@ -47,6 +48,7 @@ class Insert
 
     public function values(...$args): static
     {
+        //print_r(count($args));
         if (!is_array($args[0])) {
             $addQuotes = array_map(function ($v) {
                 return (is_string($v)) ? "'" . $v . "'" : $v;
